@@ -4,7 +4,7 @@ import time
 from loguru import logger
 
 import cv2
-# this is the test comment
+
 import torch
 
 from yolox.data.data_augment import ValTransform
@@ -117,9 +117,9 @@ def image_demo(predictor, path):
     return outs, infos
 
 
-def predict(ckpt_path='./yolox_m.pth', fp16=False, device='cpu', path='./assets/dog.jpg'):
+def predict_beta(ckpt_path='./yolox_m.pth', fp16=False, device='cpu', path='./assets/dog.jpg'):
 
-    exp = get_exp(None, yolox-m)       # Load experiment file
+    exp = get_exp(None, 'yolox-m')       # Load experiment file
 
     model = exp.get_model()
     logger.info("Model Summary: {}".format(
@@ -137,7 +137,7 @@ def predict(ckpt_path='./yolox_m.pth', fp16=False, device='cpu', path='./assets/
 
     predictor = Predictor(
         model, exp, COCO_CLASSES, trt_file, decoder,
-        device, fp16, args.legacy)
+        device, fp16)
 
     outs, infos = image_demo(predictor, path)
 
