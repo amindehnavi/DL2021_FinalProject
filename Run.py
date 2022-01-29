@@ -1,4 +1,3 @@
-from AdaBins.infer import InferenceHelper
 from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,19 +11,13 @@ import cv2
 
 import torch
 
-from YOLOX.yolox.data.data_augment import ValTransform
-from YOLOX.yolox.data.datasets import COCO_CLASSES
-from YOLOX.yolox.exp import get_exp
-from YOLOX.yolox.utils import fuse_model, get_model_info, postprocess, vis
-from YOLOX.yolox.tools.demo2 import predict_beta
-
 
 def vis2(img, outs, predicted_depth):
 
     font = cv2.FONT_HERSHEY_SIMPLEX
-
+    depth = np.copy(predicted_depth[0][0])
     for i in range(len(outs[0][0])):
-        depth = np.copy(predicted_depth[0][0])
+
         score = outs[0][0][i][4]*outs[0][0][i][5]
         if score < 0.35:
             continue
@@ -45,13 +38,19 @@ def vis2(img, outs, predicted_depth):
 
 def run(img_path):
 
+    os.chdir('/content/drive/MyDrive/DL_2021/FinalProject/AdaBins')
+    from AdaBins.infer import InferenceHelper
     # Create a InferenceHelper object
-    infer_helper = InferenceHelper()
+    infer_helper = InferenceHelper(dataset='nyu', device='cpu')
     # predict depth of a single pillow image
     img = Image.open(img_path)  # any rgb pillow image
     bin_centers, predicted_depth = infer_helper.predict_pil(img)
 
+    os.chdir('/content/drive/MyDrive/DL_2021/FinalProject/YOLOX')
+    from tools.demo2 import predict_beta
     # object Detection Prediction
-    outs, infos = predict_beta(img_path)
+    outs, infos = predict_beta(path=img_path)
+
+    os.chdir('/content/drive/MyDrive/DL_2021/FinalProject')
 
     vis2(img, outs, predicted_depth)
