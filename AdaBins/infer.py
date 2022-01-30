@@ -8,9 +8,9 @@ from PIL import Image
 from torchvision import transforms
 from tqdm import tqdm
 
-import model_io
-import utils
-from models import UnetAdaptiveBins
+from . import model_io
+from . import utils
+from .models import UnetAdaptiveBins
 
 
 def _is_pil_image(img):
@@ -75,7 +75,8 @@ class InferenceHelper:
             self.saving_factor = 1000  # used to save in 16 bit
             model = UnetAdaptiveBins.build(
                 n_bins=256, min_val=self.min_depth, max_val=self.max_depth)
-            pretrained_path = "./pretrained/AdaBins_nyu.pt"
+            
+            pretrained_path = os.path.join(os.getcwd(),'AdaBins\pretrained\AdaBins_nyu.pt')
         else:
             raise ValueError(
                 "dataset can be either 'nyu' or 'kitti' but got {}".format(dataset))
@@ -152,7 +153,6 @@ class InferenceHelper:
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from time import time
-
     img = Image.open("test_imgs/classroom__rgb_00283.jpg")
     start = time()
     inferHelper = InferenceHelper()
