@@ -66,7 +66,7 @@ class ToTensor(object):
 
 
 class InferenceHelper:
-    def __init__(self, dataset='nyu', device='cuda:0'):
+    def __init__(self, dataset='nyu', device='cpu'):
         self.toTensor = ToTensor()
         self.device = device
         if dataset == 'nyu':
