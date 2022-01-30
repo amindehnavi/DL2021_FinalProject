@@ -219,3 +219,5 @@ events.out.tfevents*
 
 # vim
 .vim
+
+*.pth
