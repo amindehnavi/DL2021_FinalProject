@@ -154,8 +154,9 @@ class MainWindow(QWidget):
         
     def PredictRoutine(self):
         self.MessageBox.append('\n>>> Predict')
-        self.predicted = run(self.RawImage)
+        self.predicted = run(self.FilePathLineEdit.text())
         self.ShowImage(self.predicted)
+        self.Image = self.predicted
         self.MessageBox.append('Ok')
           
     def ResetRoutine(self):
@@ -181,6 +182,3 @@ if __name__  == '__main__':
 	App = QApplication(sys.argv)
 	GUI = MainWindow()
 	sys.exit(App.exec())
-
-
-    

@@ -117,7 +117,7 @@ def image_demo(predictor, path):
     return outs, infos
 
 
-def predict_beta(ckpt_path='./yolox_m.pth', fp16=False, device='cpu', path='./assets/dog.jpg'):
+def predict_beta(ckpt_path='./YOLOX/yolox_m.pth', fp16=False, device='cpu', path='./assets/dog.jpg'):
 
     exp = get_exp(None, 'yolox-m')       # Load experiment file
 
