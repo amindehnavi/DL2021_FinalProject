@@ -8,6 +8,7 @@ from PyQt5.QtCore import Qt
 
 import cv2
 
+from Run import run
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -84,7 +85,7 @@ class MainWindow(QWidget):
         self.PredictButton.setGeometry(750, 130, 101, 28)
         self.PredictButton.setText("Predict")
         self.PredictButton.setEnabled(False)
-        #self.PredictButton.clicked.connect(self.PredictRoutine)
+        self.PredictButton.clicked.connect(self.PredictRoutine)
 
         self.SaveButton = QPushButton(self)
         self.SaveButton.setGeometry(890, 130, 101, 28)
@@ -150,22 +151,12 @@ class MainWindow(QWidget):
         cv2.imwrite(self.SavePathLineEdit.text() + f"/Image_{self.SaveCounter}.png", self.Image)
         self.SaveCounter += 1
         self.MessageBox.append('Ok')
-
-
         
-    '''def PredictRoutine(self):
+    def PredictRoutine(self):
         self.MessageBox.append('\n>>> Predict')
-        fileName, _ = QFileDialog.getOpenFileName(self, 'Select image', './' , 'Image files (*.png *.jpg)')
-        if fileName == '':
-            self.MessageBox.append('No Image Selected!')
-            return
-        self.MessageBox.append('Loading...')
-        self.AddressPath.setText(fileName)
-        self.RawImage = cv2.imread(fileName)
-        Image = QPixmap.fromImage(self.Numpy2Qt(self.RawImage))
-        Image = Image.scaled(640, 480)
-        self.ImageFrame.setPixmap(Image)
-        self.MessageBox.append('Image Loaded!')'''
+        self.predicted = run(self.RawImage)
+        self.ShowImage(self.predicted)
+        self.MessageBox.append('Ok')
           
     def ResetRoutine(self):
         self.MessageBox.append('\n>>> Reset')
