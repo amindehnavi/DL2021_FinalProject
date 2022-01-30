@@ -19,7 +19,7 @@ class MainWindow(QWidget):
     def InitUi(self):
         self.setGeometry(0, 0, 1181, 719)
         self.setWindowTitle("Sharif Vision")
-        self.setWindowIcon(QIcon('Icon.svg'))
+        self.setWindowIcon(QIcon('./Images/Icon.svg'))
         self.setWindowFlags(Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint)
 
         ImageFrameFont = QFont()
