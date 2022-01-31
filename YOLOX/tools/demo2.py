@@ -19,7 +19,6 @@ class Predictor(object):
         model,
         exp,
         cls_names=COCO_CLASSES,
-        trt_file=None,
         decoder=None,
         device="cpu",
         fp16=False,
@@ -35,15 +34,6 @@ class Predictor(object):
         self.device = device
         self.fp16 = fp16
         self.preproc = ValTransform(legacy=legacy)
-        if trt_file is not None:
-            from torch2trt import TRTModule
-
-            model_trt = TRTModule()
-            model_trt.load_state_dict(torch.load(trt_file))
-
-            x = torch.ones(1, 3, exp.test_size[0], exp.test_size[1]).cuda()
-            self.model(x)
-            self.model = model_trt
 
     def inference(self, img):
         img_info = {"id": 0}
@@ -110,8 +100,8 @@ def image_demo(predictor, path):
     outs = []
     infos = []
     for image_name in files:
-        outputs, img_info = predictor.inference(image_name)
 
+        outputs, img_info = predictor.inference(image_name)
         outs.append(outputs)
         infos.append(img_info)
     return outs, infos
@@ -132,11 +122,8 @@ def predict_beta(ckpt_path='./YOLOX/yolox_m.pth', fp16=False, device='cpu', path
     model.load_state_dict(ckpt["model"])
     logger.info("loaded checkpoint done.")
 
-    trt_file = None
-    decoder = None
-
     predictor = Predictor(
-        model, exp, COCO_CLASSES, trt_file, decoder,
+        model, exp, COCO_CLASSES,
         device, fp16)
 
     outs, infos = image_demo(predictor, path)
