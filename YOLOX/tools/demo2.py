@@ -37,12 +37,13 @@ class Predictor(object):
 
     def inference(self, img):
         img_info = {"id": 0}
+        '''
         if isinstance(img, str):
             img_info["file_name"] = os.path.basename(img)
             img = cv2.imread(img)
         else:
             img_info["file_name"] = None
-
+        '''
         height, width = img.shape[:2]
         img_info["height"] = height
         img_info["width"] = width
@@ -91,6 +92,7 @@ class Predictor(object):
         return vis_res, bboxes, cls, scores
 
 
+'''
 def image_demo(predictor, path):
     if os.path.isdir(path):
         files = get_image_list(path)
@@ -105,10 +107,20 @@ def image_demo(predictor, path):
         outs.append(outputs)
         infos.append(img_info)
     return outs, infos
+'''
 
 
-def predict_beta(ckpt_path='./YOLOX/yolox_m.pth', fp16=False, device='cpu', path='./assets/dog.jpg'):
+def single_img(predictor, img):
 
+    outs = []
+    infos = []
+    outputs, img_info = predictor.inference(img)
+
+    return outputs, img_info
+
+
+def predict_beta(model, exp, img, fp16=False, device='cpu'):
+    '''
     exp = get_exp(None, 'yolox-m')       # Load experiment file
 
     model = exp.get_model()
@@ -121,11 +133,11 @@ def predict_beta(ckpt_path='./YOLOX/yolox_m.pth', fp16=False, device='cpu', path
     ckpt = torch.load(ckpt_file, map_location="cpu")
     model.load_state_dict(ckpt["model"])
     logger.info("loaded checkpoint done.")
-
+    '''
     predictor = Predictor(
         model, exp, COCO_CLASSES,
         device, fp16)
 
-    outs, infos = image_demo(predictor, path)
+    outs, infos = single_img(predictor, img)
 
     return outs, infos

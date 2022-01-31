@@ -11,6 +11,7 @@ from tqdm import tqdm
 from . import model_io
 from . import utils
 from .models import UnetAdaptiveBins
+from loguru import logger
 
 
 def _is_pil_image(img):
@@ -75,8 +76,9 @@ class InferenceHelper:
             self.saving_factor = 1000  # used to save in 16 bit
             model = UnetAdaptiveBins.build(
                 n_bins=256, min_val=self.min_depth, max_val=self.max_depth)
-            
-            pretrained_path = os.path.join(os.getcwd(),'AdaBins\pretrained\AdaBins_nyu.pt')
+
+            pretrained_path = os.path.join(
+                os.getcwd(), 'AdaBins\pretrained\AdaBins_nyu.pt')
         else:
             raise ValueError(
                 "dataset can be either 'nyu' or 'kitti' but got {}".format(dataset))
@@ -84,6 +86,7 @@ class InferenceHelper:
         model, _, _ = model_io.load_checkpoint(pretrained_path, model)
         model.eval()
         self.model = model.to(self.device)
+        logger.info("Loading the AdaBins model is done!.")
 
     @torch.no_grad()
     def predict_pil(self, pil_image, visualized=False):

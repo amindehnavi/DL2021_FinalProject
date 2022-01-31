@@ -9,13 +9,14 @@ from PyQt5.QtCore import Qt
 import Models
 import Visual
 
+
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
+        # Load Pretrained Models at the startup
         self.DepthModel = Models.LoadAdabins()
-        ##################################
-        #self.YOLOModel = Models.LoadYOLO()
-        ##################################
+        self.YOLOModel, self.YOLOModel_exp = Models.LoadYOLO()
+
         self.DepthThreshold = 10.0
         self.RawImage = 0
         self.Depth = 0
@@ -27,7 +28,8 @@ class MainWindow(QWidget):
         self.setGeometry(0, 0, 1181, 719)
         self.setWindowTitle("Sharif Vision")
         self.setWindowIcon(QIcon('./Images/Icon.svg'))
-        self.setWindowFlags(Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint)
+        self.setWindowFlags(Qt.WindowCloseButtonHint |
+                            Qt.WindowMinimizeButtonHint)
 
         ImageFrameFont = QFont()
         ImageFrameFont.setFamily("Times New Roman")
@@ -50,8 +52,10 @@ class MainWindow(QWidget):
 
         self.MessageBox = QTextBrowser(self)
         self.MessageBox.setGeometry(10, 520, 641, 192)
-        self.MessageBox.append("Object Detection and Depth Estimation Apllication [Version 1.0.0]")
-        self.MessageBox.append("Developed by: Sina Nabigol & Amin Dehnavi. (c) All Rights Reserved.")
+        self.MessageBox.append(
+            "Object Detection and Depth Estimation Apllication [Version 1.0.0]")
+        self.MessageBox.append(
+            "Developed by: Sina Nabigol & Amin Dehnavi. (c) All Rights Reserved.")
 
         self.VerticalLine = QFrame(self)
         self.VerticalLine.setGeometry(650, 20, 20, 691)
@@ -66,7 +70,8 @@ class MainWindow(QWidget):
         self.FilePathLineEdit = QLineEdit(self)
         self.FilePathLineEdit.setGeometry(750, 30, 381, 28)
         self.FilePathLineEdit.setEnabled(False)
-        self.FilePathLineEdit.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.FilePathLineEdit.setStyleSheet(
+            "background-color: rgb(255, 255, 255);")
 
         self.FilePathButton = QPushButton(self)
         self.FilePathButton.setGeometry(1140, 30, 31, 28)
@@ -81,7 +86,8 @@ class MainWindow(QWidget):
         self.SavePathLineEdit = QLineEdit(self)
         self.SavePathLineEdit.setGeometry(750, 70, 381, 28)
         self.SavePathLineEdit.setEnabled(False)
-        self.SavePathLineEdit.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.SavePathLineEdit.setStyleSheet(
+            "background-color: rgb(255, 255, 255);")
 
         self.SavePathButton = QPushButton(self)
         self.SavePathButton.setGeometry(1140, 70, 31, 28)
@@ -127,7 +133,7 @@ class MainWindow(QWidget):
         self.DepthImageCheck.setFont(MainFont)
         self.DepthImageCheck.setText("Depth Image")
 
-        self.BoundingBoxCheck = QCheckBox(self)        
+        self.BoundingBoxCheck = QCheckBox(self)
         self.BoundingBoxCheck.setGeometry(680, 280, 141, 20)
         self.BoundingBoxCheck.setFont(MainFont)
         self.BoundingBoxCheck.setText("Bounding Boxes")
@@ -140,7 +146,8 @@ class MainWindow(QWidget):
         self.DepthThresholdLabel = QLabel(self)
         self.DepthThresholdLabel.setGeometry(680, 350, 471, 21)
         self.DepthThresholdLabel.setFont(MainFont)
-        self.DepthThresholdLabel.setText(f"Depth Threshhold : {self.DepthThreshold} m")
+        self.DepthThresholdLabel.setText(
+            f"Depth Threshhold : {self.DepthThreshold} m")
 
         self.DepthThresholdSlider = QSlider(self)
         self.DepthThresholdSlider.setGeometry(680, 380, 491, 22)
@@ -148,7 +155,8 @@ class MainWindow(QWidget):
         self.DepthThresholdSlider.setMaximum(1000)
         self.DepthThresholdSlider.setMinimum(0)
         self.DepthThresholdSlider.setValue(1000)
-        self.DepthThresholdSlider.valueChanged.connect(self.DepthThresholdSliderRoutine)
+        self.DepthThresholdSlider.valueChanged.connect(
+            self.DepthThresholdSliderRoutine)
 
         self.ApplyButton = QPushButton(self)
         self.ApplyButton.setGeometry(1080, 680, 91, 28)
@@ -156,14 +164,16 @@ class MainWindow(QWidget):
         self.ApplyButton.clicked.connect(self.ApplyRoutine)
 
         self.EnableOption(False)
-    
+
     def DepthThresholdSliderRoutine(self):
         self.DepthThreshold = self.DepthThresholdSlider.value()/100
-        self.DepthThresholdLabel.setText(f"Depth Threshhold : {self.DepthThreshold} m")
+        self.DepthThresholdLabel.setText(
+            f"Depth Threshhold : {self.DepthThreshold} m")
 
     def FilePathRoutine(self):
         self.MessageBox.append('\n>>> FilePath')
-        FileName, _ = QFileDialog.getOpenFileName(self, 'Select image', './' , 'Image files (*.png *.jpg)')
+        FileName, _ = QFileDialog.getOpenFileName(
+            self, 'Select image', './', 'Image files (*.png *.jpg)')
         if FileName == '':
             self.MessageBox.append('No Image Selected!')
             return
@@ -173,37 +183,38 @@ class MainWindow(QWidget):
         self.Image = self.RawImage
         self.ShowImage(self.Image)
         self.PredictButton.setEnabled(True)
-        if( len(self.FilePathLineEdit.text())>1 and len(self.SavePathLineEdit.text())>1 ):
+        if(len(self.FilePathLineEdit.text()) > 1 and len(self.SavePathLineEdit.text()) > 1):
             self.SaveButton.setEnabled(True)
         self.MessageBox.append('Image Loaded')
 
     def SavePathRoutine(self):
         self.MessageBox.append('\n>>> SavePath')
-        FolderName = QFileDialog.getExistingDirectory(self, 'Select folder', './')
+        FolderName = QFileDialog.getExistingDirectory(
+            self, 'Select folder', './')
         if FolderName == '':
             self.MessageBox.append('No Folder Selected!')
             return
         self.SavePathLineEdit.setText(FolderName)
-        if( len(self.FilePathLineEdit.text())>1 and len(self.SavePathLineEdit.text())>1 ):
+        if(len(self.FilePathLineEdit.text()) > 1 and len(self.SavePathLineEdit.text()) > 1):
             self.SaveButton.setEnabled(True)
         self.MessageBox.append('Ok')
 
     def SaveRoutine(self):
         self.MessageBox.append('\n>>> Saving')
         img = Image.fromarray(self.Image)
-        img.save(self.SavePathLineEdit.text() + f"/Image_{self.SaveCounter}.png")
+        img.save(self.SavePathLineEdit.text() +
+                 f"/Image_{self.SaveCounter}.png")
         self.SaveCounter += 1
         self.MessageBox.append('Ok')
-        
+
     def PredictRoutine(self):
         self.MessageBox.append('\n>>> Predict')
         self.Depth = Models.PredictDepth(self.DepthModel, self.RawImage)
-        #########################################################################
-        #self.BoundingBox = Models.PredictBoundingBox(self.YOLOModel, self.RawImage)
-        ##########################################################################
+        self.YOLO_Out, self.Img_Info = Models.PredictBoundingBox(
+            self.YOLOModel, self.YOLOModel_exp, self.RawImage, fp16=False, device='cpu')
         self.EnableOption(True)
         self.MessageBox.append('Ok')
-          
+
     def ResetRoutine(self):
         self.MessageBox.append('\n>>> Reset')
         self.FilePathLineEdit.setText(' ')
@@ -213,26 +224,24 @@ class MainWindow(QWidget):
         self.SaveButton.setEnabled(False)
         self.EnableOption(False)
         self.MessageBox.append('Ok')
-    
+
     def ApplyRoutine(self):
         self.MessageBox.append('\n>>> Apply')
-        if self.DepthImageCheck.isChecked():
-            depthMap = Visual.visualize(self.RawImage, self.Depth,\
-                                        self.BoundingBox, self.DepthThreshold)
-            self.Image = depthMap
-        else:
-            self.Image = self.RawImage
+        self.Image = Visual.visualize(self.RawImage, self.Depth,
+                                      self.YOLO_Out, self.DepthThreshold, self.Img_Info, Depth_check=self.DepthImageCheck.isChecked(),
+                                      BoundingBox_Check=self.BoundingBoxCheck.isChecked(),
+                                      DepthInfo_Check=self.DepthInfoCheck.isChecked())
         self.ShowImage(self.Image)
         self.MessageBox.append('Ok')
 
     def Numpy2Qt(self, Image):
         return QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
-    
+
     def ShowImage(self, Image):
         Image = QPixmap.fromImage(self.Numpy2Qt(Image))
         Image = Image.scaled(640, 480)
         self.ImageFrame.setPixmap(Image)
-    
+
     def EnableOption(self, state):
         self.DepthImageCheck.setChecked(False)
         self.BoundingBoxCheck.setChecked(False)
@@ -245,7 +254,7 @@ class MainWindow(QWidget):
         self.ApplyButton.setEnabled(state)
 
 
-if __name__  == '__main__':
-	App = QApplication(sys.argv)
-	GUI = MainWindow()
-	sys.exit(App.exec())
+if __name__ == '__main__':
+    App = QApplication(sys.argv)
+    GUI = MainWindow()
+    sys.exit(App.exec())
