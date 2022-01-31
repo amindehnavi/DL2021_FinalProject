@@ -6,12 +6,13 @@ from PyQt5.QtWidgets import QPushButton, QLineEdit, QTextBrowser
 from PyQt5.QtWidgets import QFileDialog, QFrame, QCheckBox
 from PyQt5.QtGui import QIcon, QPixmap, QFont, QImage
 from PyQt5.QtCore import Qt
-
-
+import Models
+import Visual
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
+        self.DepthModel = Models.LoadAdabins()
         self.InitUi()
         self.show()
 
@@ -133,6 +134,7 @@ class MainWindow(QWidget):
         self.ApplyButton.setGeometry(1080, 680, 91, 28)
         self.ApplyButton.setText("Apply")
         self.ApplyButton.setEnabled(False)
+        self.ApplyButton.clicked.connect(self.ApplyRoutine)
 
     def FilePathRoutine(self):
         self.MessageBox.append('\n>>> FilePath')
@@ -170,9 +172,7 @@ class MainWindow(QWidget):
         
     def PredictRoutine(self):
         self.MessageBox.append('\n>>> Predict')
-        #self.predicted = run(self.FilePathLineEdit.text())
-        #self.ShowImage(self.predicted)
-        #self.Image = self.predicted
+        self.Depth = Models.PredictDepth(self.DepthModel, self.RawImage)
         self.ApplyButton.setEnabled(True)
         self.MessageBox.append('Ok')
           
@@ -184,6 +184,16 @@ class MainWindow(QWidget):
         self.PredictButton.setEnabled(False)
         self.SaveButton.setEnabled(False)
         self.ApplyButton.setEnabled(False)
+        self.MessageBox.append('Ok')
+    
+    def ApplyRoutine(self):
+        self.MessageBox.append('\n>>> Apply')
+        if self.DepthImageCheck.isChecked():
+            depthMap = Visual.DepthMap(self.Depth)
+            self.Image = depthMap
+        else:
+            self.Image = self.RawImage
+        self.ShowImage(self.Image)
         self.MessageBox.append('Ok')
 
     def Numpy2Qt(self, Image):

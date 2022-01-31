@@ -1,6 +1,6 @@
 import matplotlib
 import numpy as np
-import pycocotools
+
 def DepthMap(depth):
     NormedDepth = (depth - np.min(depth)) / (np.max(depth) - np.min(depth))
     CMap = matplotlib.cm.get_cmap('plasma')
