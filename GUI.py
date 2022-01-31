@@ -1,7 +1,7 @@
 import sys
 from PIL import Image
 import numpy as np
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QSlider
 from PyQt5.QtWidgets import QPushButton, QLineEdit, QTextBrowser
 from PyQt5.QtWidgets import QFileDialog, QFrame, QCheckBox
 from PyQt5.QtGui import QIcon, QPixmap, QFont, QImage
@@ -13,6 +13,13 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.DepthModel = Models.LoadAdabins()
+        ##################################
+        #self.YOLOModel = Models.LoadYOLO()
+        ##################################
+        self.DepthThreshold = 10.0
+        self.RawImage = 0
+        self.Depth = 0
+        self.BoundingBox = 0
         self.InitUi()
         self.show()
 
@@ -119,22 +126,40 @@ class MainWindow(QWidget):
         self.DepthImageCheck.setGeometry(680, 250, 131, 20)
         self.DepthImageCheck.setFont(MainFont)
         self.DepthImageCheck.setText("Depth Image")
-        self.BoundingBoxCheck = QCheckBox(self)
 
+        self.BoundingBoxCheck = QCheckBox(self)        
         self.BoundingBoxCheck.setGeometry(680, 280, 141, 20)
         self.BoundingBoxCheck.setFont(MainFont)
         self.BoundingBoxCheck.setText("Bounding Boxes")
-        self.DepthInfoCheck = QCheckBox(self)
 
+        self.DepthInfoCheck = QCheckBox(self)
         self.DepthInfoCheck.setGeometry(680, 310, 161, 20)
         self.DepthInfoCheck.setFont(MainFont)
         self.DepthInfoCheck.setText("Depth Information")
 
+        self.DepthThresholdLabel = QLabel(self)
+        self.DepthThresholdLabel.setGeometry(680, 350, 471, 21)
+        self.DepthThresholdLabel.setFont(MainFont)
+        self.DepthThresholdLabel.setText(f"Depth Threshhold : {self.DepthThreshold} m")
+
+        self.DepthThresholdSlider = QSlider(self)
+        self.DepthThresholdSlider.setGeometry(680, 380, 491, 22)
+        self.DepthThresholdSlider.setOrientation(Qt.Horizontal)
+        self.DepthThresholdSlider.setMaximum(1000)
+        self.DepthThresholdSlider.setMinimum(0)
+        self.DepthThresholdSlider.setValue(1000)
+        self.DepthThresholdSlider.valueChanged.connect(self.DepthThresholdSliderRoutine)
+
         self.ApplyButton = QPushButton(self)
         self.ApplyButton.setGeometry(1080, 680, 91, 28)
         self.ApplyButton.setText("Apply")
-        self.ApplyButton.setEnabled(False)
         self.ApplyButton.clicked.connect(self.ApplyRoutine)
+
+        self.EnableOption(False)
+    
+    def DepthThresholdSliderRoutine(self):
+        self.DepthThreshold = self.DepthThresholdSlider.value()/100
+        self.DepthThresholdLabel.setText(f"Depth Threshhold : {self.DepthThreshold} m")
 
     def FilePathRoutine(self):
         self.MessageBox.append('\n>>> FilePath')
@@ -173,7 +198,10 @@ class MainWindow(QWidget):
     def PredictRoutine(self):
         self.MessageBox.append('\n>>> Predict')
         self.Depth = Models.PredictDepth(self.DepthModel, self.RawImage)
-        self.ApplyButton.setEnabled(True)
+        #########################################################################
+        #self.BoundingBox = Models.PredictBoundingBox(self.YOLOModel, self.RawImage)
+        ##########################################################################
+        self.EnableOption(True)
         self.MessageBox.append('Ok')
           
     def ResetRoutine(self):
@@ -183,13 +211,14 @@ class MainWindow(QWidget):
         self.ImageFrame.setText("Please load an image!")
         self.PredictButton.setEnabled(False)
         self.SaveButton.setEnabled(False)
-        self.ApplyButton.setEnabled(False)
+        self.EnableOption(False)
         self.MessageBox.append('Ok')
     
     def ApplyRoutine(self):
         self.MessageBox.append('\n>>> Apply')
         if self.DepthImageCheck.isChecked():
-            depthMap = Visual.DepthMap(self.Depth)
+            depthMap = Visual.visualize(self.RawImage, self.Depth,\
+                                        self.BoundingBox, self.DepthThreshold)
             self.Image = depthMap
         else:
             self.Image = self.RawImage
@@ -203,7 +232,17 @@ class MainWindow(QWidget):
         Image = QPixmap.fromImage(self.Numpy2Qt(Image))
         Image = Image.scaled(640, 480)
         self.ImageFrame.setPixmap(Image)
-        
+    
+    def EnableOption(self, state):
+        self.DepthImageCheck.setChecked(False)
+        self.BoundingBoxCheck.setChecked(False)
+        self.DepthInfoCheck.setChecked(False)
+        self.DepthImageCheck.setEnabled(state)
+        self.BoundingBoxCheck.setEnabled(state)
+        self.DepthInfoCheck.setEnabled(state)
+        self.DepthThresholdLabel.setEnabled(state)
+        self.DepthThresholdSlider.setEnabled(state)
+        self.ApplyButton.setEnabled(state)
 
 
 if __name__  == '__main__':
