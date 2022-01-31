@@ -1,14 +1,13 @@
 import sys
-
+from PIL import Image
+import numpy as np
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel
 from PyQt5.QtWidgets import QPushButton, QLineEdit, QTextBrowser
-from PyQt5.QtWidgets import QFileDialog, QFrame
+from PyQt5.QtWidgets import QFileDialog, QFrame, QCheckBox
 from PyQt5.QtGui import QIcon, QPixmap, QFont, QImage
 from PyQt5.QtCore import Qt
 
-import cv2
 
-from Run import run
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -115,9 +114,25 @@ class MainWindow(QWidget):
         self.HorizontalRightLine.setFrameShape(QFrame.HLine)
         self.HorizontalRightLine.setFrameShadow(QFrame.Sunken)
 
+        self.DepthImageCheck = QCheckBox(self)
+        self.DepthImageCheck.setGeometry(680, 250, 131, 20)
+        self.DepthImageCheck.setFont(MainFont)
+        self.DepthImageCheck.setText("Depth Image")
+        self.BoundingBoxCheck = QCheckBox(self)
+
+        self.BoundingBoxCheck.setGeometry(680, 280, 141, 20)
+        self.BoundingBoxCheck.setFont(MainFont)
+        self.BoundingBoxCheck.setText("Bounding Boxes")
+        self.DepthInfoCheck = QCheckBox(self)
+
+        self.DepthInfoCheck.setGeometry(680, 310, 161, 20)
+        self.DepthInfoCheck.setFont(MainFont)
+        self.DepthInfoCheck.setText("Depth Information")
+
         self.ApplyButton = QPushButton(self)
         self.ApplyButton.setGeometry(1080, 680, 91, 28)
         self.ApplyButton.setText("Apply")
+        self.ApplyButton.setEnabled(False)
 
     def FilePathRoutine(self):
         self.MessageBox.append('\n>>> FilePath')
@@ -125,9 +140,9 @@ class MainWindow(QWidget):
         if FileName == '':
             self.MessageBox.append('No Image Selected!')
             return
-        self.MessageBox.append('Loading...')
         self.FilePathLineEdit.setText(FileName)
-        self.RawImage = cv2.imread(FileName)
+        self.RawImage = Image.open(FileName)
+        self.RawImage = np.asarray(self.RawImage)
         self.Image = self.RawImage
         self.ShowImage(self.Image)
         self.PredictButton.setEnabled(True)
@@ -148,15 +163,17 @@ class MainWindow(QWidget):
 
     def SaveRoutine(self):
         self.MessageBox.append('\n>>> Saving')
-        cv2.imwrite(self.SavePathLineEdit.text() + f"/Image_{self.SaveCounter}.png", self.Image)
+        img = Image.fromarray(self.Image)
+        img.save(self.SavePathLineEdit.text() + f"/Image_{self.SaveCounter}.png")
         self.SaveCounter += 1
         self.MessageBox.append('Ok')
         
     def PredictRoutine(self):
         self.MessageBox.append('\n>>> Predict')
-        self.predicted = run(self.FilePathLineEdit.text())
-        self.ShowImage(self.predicted)
-        self.Image = self.predicted
+        #self.predicted = run(self.FilePathLineEdit.text())
+        #self.ShowImage(self.predicted)
+        #self.Image = self.predicted
+        self.ApplyButton.setEnabled(True)
         self.MessageBox.append('Ok')
           
     def ResetRoutine(self):
@@ -166,10 +183,11 @@ class MainWindow(QWidget):
         self.ImageFrame.setText("Please load an image!")
         self.PredictButton.setEnabled(False)
         self.SaveButton.setEnabled(False)
+        self.ApplyButton.setEnabled(False)
         self.MessageBox.append('Ok')
 
     def Numpy2Qt(self, Image):
-        return QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888).rgbSwapped()
+        return QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
     
     def ShowImage(self, Image):
         Image = QPixmap.fromImage(self.Numpy2Qt(Image))
