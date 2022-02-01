@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QSlider
 from PyQt5.QtWidgets import QPushButton, QLineEdit, QTextBrowser
-from PyQt5.QtWidgets import QFileDialog, QFrame, QCheckBox
+from PyQt5.QtWidgets import QFileDialog, QFrame, QCheckBox,QRadioButton
 from PyQt5.QtGui import QIcon, QPixmap, QFont, QImage
 from PyQt5.QtCore import Qt
 import Models
@@ -18,9 +18,11 @@ class MainWindow(QWidget):
         self.YOLOModel, self.YOLOModel_exp = Models.LoadYOLOX()
 
         self.DepthThreshold = 10.0
+        self.MinConfidence = 0.5
         self.RawImage = 0
         self.Depth = 0
         self.BoundingBox = 0
+        self.RadioButton = 'Raw Image'
         self.InitUi()
         self.show()
 
@@ -128,35 +130,53 @@ class MainWindow(QWidget):
         self.HorizontalRightLine.setFrameShape(QFrame.HLine)
         self.HorizontalRightLine.setFrameShadow(QFrame.Sunken)
 
-        self.DepthImageCheck = QCheckBox(self)
-        self.DepthImageCheck.setGeometry(680, 250, 131, 20)
-        self.DepthImageCheck.setFont(MainFont)
-        self.DepthImageCheck.setText("Depth Image")
+        self.RadioButton1 = QRadioButton(self)
+        self.RadioButton1.setGeometry(680, 230, 121, 20)
+        self.RadioButton1.setFont(MainFont)
+        self.RadioButton1.setText("Raw Image")
+        self.RadioButton1.toggled.connect(self.RadioButtonRoutine)
 
-        self.BoundingBoxCheck = QCheckBox(self)
-        self.BoundingBoxCheck.setGeometry(680, 280, 141, 20)
-        self.BoundingBoxCheck.setFont(MainFont)
-        self.BoundingBoxCheck.setText("Bounding Boxes")
+        self.RadioButton2 = QRadioButton(self)
+        self.RadioButton2.setGeometry(680, 260, 121, 20)
+        self.RadioButton2.setFont(MainFont)
+        self.RadioButton2.setText("Depth Image")
+        self.RadioButton2.toggled.connect(self.RadioButtonRoutine)
 
-        self.DepthInfoCheck = QCheckBox(self)
-        self.DepthInfoCheck.setGeometry(680, 310, 161, 20)
-        self.DepthInfoCheck.setFont(MainFont)
-        self.DepthInfoCheck.setText("Depth Information")
+        self.RadioButton3 = QRadioButton(self)
+        self.RadioButton3.setGeometry(680, 290, 231, 20)
+        self.RadioButton3.setFont(MainFont)
+        self.RadioButton3.setText("Raw Image + Bounding Boxes")
+        self.RadioButton3.toggled.connect(self.RadioButtonRoutine)
+
+        self.RadioButton4 = QRadioButton(self)
+        self.RadioButton4.setGeometry(680, 320, 251, 20)
+        self.RadioButton4.setFont(MainFont)
+        self.RadioButton4.setText("Depth Image + Bounding Boxes")
+        self.RadioButton4.toggled.connect(self.RadioButtonRoutine)
 
         self.DepthThresholdLabel = QLabel(self)
-        self.DepthThresholdLabel.setGeometry(680, 350, 471, 21)
+        self.DepthThresholdLabel.setGeometry(680, 360, 471, 21)
         self.DepthThresholdLabel.setFont(MainFont)
-        self.DepthThresholdLabel.setText(
-            f"Depth Threshhold : {self.DepthThreshold} m")
 
         self.DepthThresholdSlider = QSlider(self)
-        self.DepthThresholdSlider.setGeometry(680, 380, 491, 22)
+        self.DepthThresholdSlider.setGeometry(680, 390, 491, 22)
         self.DepthThresholdSlider.setOrientation(Qt.Horizontal)
         self.DepthThresholdSlider.setMaximum(1000)
         self.DepthThresholdSlider.setMinimum(0)
-        self.DepthThresholdSlider.setValue(1000)
         self.DepthThresholdSlider.valueChanged.connect(
             self.DepthThresholdSliderRoutine)
+        
+        self.MinConfidenceLabel = QLabel(self)
+        self.MinConfidenceLabel.setGeometry(680, 430, 471, 21)
+        self.MinConfidenceLabel.setFont(MainFont)
+
+        self.MinConfidenceSlider = QSlider(self)
+        self.MinConfidenceSlider.setGeometry(680, 460, 491, 22)
+        self.MinConfidenceSlider.setOrientation(Qt.Horizontal)
+        self.MinConfidenceSlider.setMaximum(100)
+        self.MinConfidenceSlider.setMinimum(0)
+        self.MinConfidenceSlider.valueChanged.connect(
+            self.MinConfidenceSliderRoutine)
 
         self.ApplyButton = QPushButton(self)
         self.ApplyButton.setGeometry(1080, 680, 91, 28)
@@ -165,20 +185,16 @@ class MainWindow(QWidget):
 
         self.EnableOption(False)
 
-    def DepthThresholdSliderRoutine(self):
-        self.DepthThreshold = self.DepthThresholdSlider.value()/100
-        self.DepthThresholdLabel.setText(
-            f"Depth Threshhold : {self.DepthThreshold} m")
-
     def FilePathRoutine(self):
         self.MessageBox.append('\n>>> FilePath')
         FileName, _ = QFileDialog.getOpenFileName(
-            self, 'Select image', './', 'Image files (*.png *.jpg)')
+            self, 'Select image', './', 'Image files (*.jpg *.jpeg)')
         if FileName == '':
             self.MessageBox.append('No Image Selected!')
             return
         self.FilePathLineEdit.setText(FileName)
         self.RawImage = Image.open(FileName)
+        self.RawImage = self.RawImage.resize((640, 480))
         self.RawImage = np.asarray(self.RawImage)
         self.Image = self.RawImage
         self.ShowImage(self.Image)
@@ -203,7 +219,7 @@ class MainWindow(QWidget):
         self.MessageBox.append('\n>>> Saving')
         img = Image.fromarray(self.Image)
         img.save(self.SavePathLineEdit.text() +
-                 f"/Image_{self.SaveCounter}.png")
+                 f"/Image_{self.SaveCounter}.jpg")
         self.SaveCounter += 1
         self.MessageBox.append('Ok')
 
@@ -224,13 +240,27 @@ class MainWindow(QWidget):
         self.SaveButton.setEnabled(False)
         self.EnableOption(False)
         self.MessageBox.append('Ok')
+    
+    def RadioButtonRoutine(self, _):
+        button = self.sender()
+        if button.isChecked() == True:
+            self.RadioButton = button.text()
+    
+    def DepthThresholdSliderRoutine(self):
+        self.DepthThreshold = self.DepthThresholdSlider.value()/100
+        self.DepthThresholdLabel.setText(
+            f"Max. Depth : {self.DepthThreshold} m")
+    
+    def MinConfidenceSliderRoutine(self):
+        self.MinConfidence = self.MinConfidenceSlider.value()/100
+        self.MinConfidenceLabel.setText(
+            f"Min. Confidence : {self.MinConfidence}")
 
     def ApplyRoutine(self):
         self.MessageBox.append('\n>>> Apply')
-        self.Image = Visual.visualize(self.RawImage, self.Depth,
-                                      self.YOLO_Out, self.DepthThreshold, self.Img_Info, Conf=0.3, Depth_Check=self.DepthImageCheck.isChecked(),
-                                      BoundingBox_Check=self.BoundingBoxCheck.isChecked(),
-                                      DepthInfo_Check=self.DepthInfoCheck.isChecked())
+        self.Image = Visual.visualize(np.copy(self.RawImage), np.copy(self.Depth),
+                                      self.YOLO_Out, self.Img_Info, self.DepthThreshold,
+                                      self.MinConfidence, self.RadioButton)
         self.ShowImage(self.Image)
         self.MessageBox.append('Ok')
 
@@ -243,14 +273,24 @@ class MainWindow(QWidget):
         self.ImageFrame.setPixmap(Image)
 
     def EnableOption(self, state):
-        self.DepthImageCheck.setChecked(False)
-        self.BoundingBoxCheck.setChecked(False)
-        self.DepthInfoCheck.setChecked(False)
-        self.DepthImageCheck.setEnabled(state)
-        self.BoundingBoxCheck.setEnabled(state)
-        self.DepthInfoCheck.setEnabled(state)
+        self.RadioButton1.setChecked(True)
+        self.RadioButton1.setEnabled(state)
+        self.RadioButton2.setEnabled(state)
+        self.RadioButton3.setEnabled(state)
+        self.RadioButton4.setEnabled(state)
+
+        self.DepthThresholdLabel.setText(
+        f"Max. Depth : {self.DepthThreshold} m")
+        self.DepthThresholdSlider.setValue(1000)
         self.DepthThresholdLabel.setEnabled(state)
         self.DepthThresholdSlider.setEnabled(state)
+
+        self.MinConfidenceLabel.setText(
+            f"Min. Confidence : {self.MinConfidence}")
+        self.MinConfidenceSlider.setValue(50)
+        self.MinConfidenceLabel.setEnabled(state)
+        self.MinConfidenceSlider.setEnabled(state)
+
         self.ApplyButton.setEnabled(state)
 
 

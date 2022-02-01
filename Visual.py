@@ -4,7 +4,7 @@ from YOLOX.yolox.data.datasets import COCO_CLASSES
 import cv2
 
 
-def Bbox_Drawer(img, predicted_depth, boxes, scores, cls_ids, conf=0.5, depth_thr=1, class_names=COCO_CLASSES):
+def Bbox_Drawer(raw_image, img, predicted_depth, boxes, scores, cls_ids, conf=0.5, depth_thr=1, class_names=COCO_CLASSES):
 
     for i in range(len(boxes)):
         box = boxes[i]
@@ -17,8 +17,11 @@ def Bbox_Drawer(img, predicted_depth, boxes, scores, cls_ids, conf=0.5, depth_th
         x1 = int(box[2])
         y1 = int(box[3])
 
-        dis = np.median(
-            predicted_depth[int(y0):int(y1), int(x0):int(x1)])
+        mask = Mask(raw_image[int(y0):int(y1), int(x0):int(x1)])/255
+        dis1 = ( np.sum(predicted_depth[int(y0):int(y1), int(x0):int(x1)]*mask) )/np.sum(mask)
+        mask = -1*(mask-1)
+        dis2 = ( np.sum(predicted_depth[int(y0):int(y1), int(x0):int(x1)]*mask) )/np.sum(mask)
+        dis = min(dis1, dis2)
 
         if dis > depth_thr:
             continue
@@ -50,23 +53,38 @@ def Bbox_Drawer(img, predicted_depth, boxes, scores, cls_ids, conf=0.5, depth_th
 
 def Depth2Img (Depth):
     NormedDepth = (Depth - np.min(Depth)) / (np.max(Depth) - np.min(Depth))
-    CMap = matplotlib.cm.get_cmap('jet')
+    CMap = matplotlib.cm.get_cmap('plasma_r')
     CMap = CMap.reversed()
     depthMap = CMap(NormedDepth)
     depthMap = depthMap[:, :, 0:3] * 255
     depthMap = depthMap.astype('uint8')
     return depthMap
 
+def Mask(img):  
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    _, mask = cv2.threshold(gray, 0, 255,
+    cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    return mask
 
-def visualize(RawImage, Depth, YOLO_Out, DepthThreshold, Img_Info, Conf=0.5, Depth_Check=False, BoundingBox_Check=False, DepthInfo_Check=False):
 
-    if Depth_Check==True and BoundingBox_Check==False and DepthInfo_Check==False:
+def visualize(RawImage, Depth, YOLO_Out, Img_Info, DepthThreshold,  Conf=0.5, RadioButton = 'Raw Image'):
+
+    if RadioButton == 'Depth Image':
         return Depth2Img (Depth)
+    
+    elif RadioButton == 'Raw Image':
+        return RawImage
 
     else:
         ratio = Img_Info["ratio"]
         if YOLO_Out is None:
-            return RawImage
+            
+            if RadioButton == 'Raw Image + Bounding Boxes':
+                return RawImage
+
+            elif RadioButton == 'Depth Image + Bounding Boxes':
+                return Depth2Img (Depth)
+
         Output = YOLO_Out[0].numpy()
 
         Bboxes = Output[:,0:4]
@@ -78,17 +96,17 @@ def visualize(RawImage, Depth, YOLO_Out, DepthThreshold, Img_Info, Conf=0.5, Dep
         Scores = Output[:,4] * Output[:,5]
 
         # Draw corresponding bounding boxes on depth map
-        if Depth_Check==True and BoundingBox_Check==True and DepthInfo_Check==False:
+        if RadioButton == 'Raw Image + Bounding Boxes':
             res_img = Bbox_Drawer(
-                Depth2Img(Depth), Depth, Bboxes, Scores, Cls, conf=Conf, depth_thr=DepthThreshold)
-        elif DepthInfo_Check==True and Depth_Check==False:
+                RawImage, RawImage, Depth, Bboxes, Scores, Cls, conf=Conf, depth_thr=DepthThreshold)
+            return res_img
+
+        elif RadioButton == 'Depth Image + Bounding Boxes':
             res_img = Bbox_Drawer(
-                RawImage, Depth, Bboxes, Scores, Cls, conf=Conf, depth_thr=DepthThreshold)
-        else:
-            res_img = RawImage
-
-        return res_img
-
+                RawImage, Depth2Img(Depth), Depth, Bboxes, Scores, Cls, conf=Conf, depth_thr=DepthThreshold)
+            return res_img
+    
+    return RawImage
 
 _COLORS = np.array(
     [
