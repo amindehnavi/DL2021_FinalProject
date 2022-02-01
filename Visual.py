@@ -18,16 +18,15 @@ def Bbox_Drawer(img, predicted_depth, boxes, scores, cls_ids, conf=0.5, depth_th
         y1 = int(box[3])
 
         dis = np.median(
-            predicted_depth[0, 0, int(y0):int(y1), int(x0):int(x1)])
+            predicted_depth[int(y0):int(y1), int(x0):int(x1)])
 
         if dis > depth_thr:
             continue
-
         color = (_COLORS[cls_id] * 255).astype(np.uint8).tolist()
-        text = '{}|S:{:.1f}|D:{:.1f}%'.format(
+        text = '{}|S:{:.1f}%|D:{:.1f}m'.format(
             class_names[cls_id], score * 100, dis)
         txt_color = (0, 0, 0) if np.mean(
-            _COLORS[cls_id]) > 0.5 else (255, 255, 255)
+        _COLORS[cls_id]) > 0.5 else (255, 255, 255)
         font = cv2.FONT_HERSHEY_SIMPLEX
 
         txt_size = cv2.getTextSize(text, font, 0.4, 1)[0]
@@ -46,36 +45,40 @@ def Bbox_Drawer(img, predicted_depth, boxes, scores, cls_ids, conf=0.5, depth_th
 
     return img
 
+def Depth2Img (Depth):
+    NormedDepth = (Depth - np.min(Depth)) / (np.max(Depth) - np.min(Depth))
+    CMap = matplotlib.cm.get_cmap('jet')
+    CMap = CMap.reversed()
+    depthMap = CMap(NormedDepth)
+    depthMap = depthMap[:, :, 0:3] * 255
+    depthMap = depthMap.astype('uint8')
+    return depthMap
 
-def visualize(RawImage, Depth, YOLO_Out, DepthThreshold, Img_Info, Conf=0.5, Depth_check=False, BoundingBox_check=False, Depth_Info_check=False):
 
-    if Depth_check and ~BoundingBox_check and ~Depth_Info_check:
-        NormedDepth = (Depth - np.min(Depth)) / (np.max(Depth) - np.min(Depth))
-        CMap = matplotlib.cm.get_cmap('plasma')
-        depthMap = CMap(NormedDepth)
-        depthMap = depthMap[:, :, 0:3] * 255
-        depthMap = depthMap.astype('uint8')
-        return depthMap
+def visualize(RawImage, Depth, YOLO_Out, DepthThreshold, Img_Info, Conf=0.5, Depth_Check=False, BoundingBox_Check=False, DepthInfo_Check=False):
+
+    if Depth_Check==True and BoundingBox_Check==False and DepthInfo_Check==False:
+        return Depth2Img (Depth)
 
     else:
         ratio = Img_Info["ratio"]
         if YOLO_Out is None:
             return RawImage
-        Output = YOLO_Out.cpu()
+        Output = YOLO_Out[0].numpy()
 
-        Bboxes = Output[:, 0:4]
+        Bboxes = Output[:,0:4]
 
         # preprocessing: resize
         Bboxes /= ratio
 
-        Cls = Output[:, 6]
-        Scores = Output[:, 4] * Output[:, 5]
+        Cls = Output[:,6]
+        Scores = Output[:,4] * Output[:,5]
 
         # Draw corresponding bounding boxes on depth map
-        if Depth_check and BoundingBox_check and ~Depth_Info_check:
+        if Depth_Check==True and BoundingBox_Check==True and DepthInfo_Check==False:
             res_img = Bbox_Drawer(
-                Depth, Depth, Bboxes, Scores, Cls, conf=Conf, depth_thr=DepthThreshold)
-        elif Depth_Info_check and ~Depth_check:
+                Depth2Img(Depth), Depth, Bboxes, Scores, Cls, conf=Conf, depth_thr=DepthThreshold)
+        elif DepthInfo_Check==True and Depth_Check==False:
             res_img = Bbox_Drawer(
                 RawImage, Depth, Bboxes, Scores, Cls, conf=Conf, depth_thr=DepthThreshold)
         else:

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from loguru import logger
 from .miniViT import mViT
 
 
@@ -122,19 +122,19 @@ class UnetAdaptiveBins(nn.Module):
     def build(cls, n_bins, **kwargs):
         basemodel_name = 'tf_efficientnet_b5_ap'
 
-        print('Loading base model ()...'.format(basemodel_name), end='')
+        logger.info('Loading AdaBins base model ()...'.format(basemodel_name), end='')
         basemodel = torch.hub.load('rwightman/gen-efficientnet-pytorch', basemodel_name, pretrained=True)
-        print('Done.')
+        logger.info('Done.')
 
         # Remove last layer
-        print('Removing last two layers (global_pool & classifier).')
+        logger.info('Removing last two layers (global_pool & classifier).')
         basemodel.global_pool = nn.Identity()
         basemodel.classifier = nn.Identity()
 
         # Building Encoder-Decoder model
-        print('Building Encoder-Decoder model..', end='')
+        logger.info('Building Encoder-Decoder model..', end='')
         m = cls(basemodel, n_bins=n_bins, **kwargs)
-        print('Done.')
+        logger.info('Done.')
         return m
 
 

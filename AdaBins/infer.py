@@ -78,7 +78,7 @@ class InferenceHelper:
                 n_bins=256, min_val=self.min_depth, max_val=self.max_depth)
 
             pretrained_path = os.path.join(
-                os.getcwd(), 'AdaBins\pretrained\AdaBins_nyu.pt')
+                os.getcwd(), 'AdaBins/pretrained/AdaBins_nyu.pt')
         else:
             raise ValueError(
                 "dataset can be either 'nyu' or 'kitti' but got {}".format(dataset))

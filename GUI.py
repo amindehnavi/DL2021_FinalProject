@@ -228,7 +228,7 @@ class MainWindow(QWidget):
     def ApplyRoutine(self):
         self.MessageBox.append('\n>>> Apply')
         self.Image = Visual.visualize(self.RawImage, self.Depth,
-                                      self.YOLO_Out, self.DepthThreshold, self.Img_Info, Depth_check=self.DepthImageCheck.isChecked(),
+                                      self.YOLO_Out, self.DepthThreshold, self.Img_Info, Conf=0.3, Depth_check=self.DepthImageCheck.isChecked(),
                                       BoundingBox_Check=self.BoundingBoxCheck.isChecked(),
                                       DepthInfo_Check=self.DepthInfoCheck.isChecked())
         self.ShowImage(self.Image)
