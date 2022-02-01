@@ -23,25 +23,28 @@ def Bbox_Drawer(img, predicted_depth, boxes, scores, cls_ids, conf=0.5, depth_th
         if dis > depth_thr:
             continue
         color = (_COLORS[cls_id] * 255).astype(np.uint8).tolist()
-        text = '{}|S:{:.1f}%|D:{:.1f}m'.format(
-            class_names[cls_id], score * 100, dis)
+        text1 = '{}: {:.1f}%'.format(
+            class_names[cls_id], score * 100)
+        text2 = 'depth:{:.1f}m'.format(dis)
         txt_color = (0, 0, 0) if np.mean(
         _COLORS[cls_id]) > 0.5 else (255, 255, 255)
         font = cv2.FONT_HERSHEY_SIMPLEX
 
-        txt_size = cv2.getTextSize(text, font, 0.4, 1)[0]
+        txt_size = cv2.getTextSize(text1, font, 0.4, 1)[0]
         cv2.rectangle(img, (x0, y0), (x1, y1), color, 2)
 
         txt_bk_color = (_COLORS[cls_id] * 255 * 0.7).astype(np.uint8).tolist()
         cv2.rectangle(
             img,
             (x0, y0 + 1),
-            (x0 + txt_size[0] + 1, y0 + int(1.5*txt_size[1])),
+            (x0 + txt_size[0] + 1, y0 + 2*int(1.5*txt_size[1]) + 1),
             txt_bk_color,
             -1
         )
         cv2.putText(
-            img, text, (x0, y0 + txt_size[1]), font, 0.4, txt_color, thickness=1)
+            img, text1, (x0, y0 + txt_size[1]), font, 0.4, txt_color, thickness=1)
+        cv2.putText(
+            img, text2, (x0, y0 + 2*txt_size[1]+6), font, 0.4, txt_color, thickness=1)
 
     return img
 
