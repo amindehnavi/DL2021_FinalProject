@@ -1,3 +1,4 @@
-#import sys
+import sys
+import os
 
-#sys.path.append('/content/drive/MyDrive/DL_2021/FinalProject/YOLOX')
+sys.path.append(os.getcwd()+'\YOLOX')

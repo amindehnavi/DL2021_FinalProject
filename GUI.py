@@ -15,7 +15,7 @@ class MainWindow(QWidget):
         super().__init__()
         # Load Pretrained Models at the startup
         self.DepthModel = Models.LoadAdabins()
-        self.YOLOModel, self.YOLOModel_exp = Models.LoadYOLO()
+        self.YOLOModel, self.YOLOModel_exp = Models.LoadYOLOX()
 
         self.DepthThreshold = 10.0
         self.RawImage = 0
@@ -228,7 +228,7 @@ class MainWindow(QWidget):
     def ApplyRoutine(self):
         self.MessageBox.append('\n>>> Apply')
         self.Image = Visual.visualize(self.RawImage, self.Depth,
-                                      self.YOLO_Out, self.DepthThreshold, self.Img_Info, Conf=0.3, Depth_check=self.DepthImageCheck.isChecked(),
+                                      self.YOLO_Out, self.DepthThreshold, self.Img_Info, Conf=0.3, Depth_Check=self.DepthImageCheck.isChecked(),
                                       BoundingBox_Check=self.BoundingBoxCheck.isChecked(),
                                       DepthInfo_Check=self.DepthInfoCheck.isChecked())
         self.ShowImage(self.Image)
