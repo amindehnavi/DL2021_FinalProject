@@ -17,11 +17,7 @@ def Bbox_Drawer(raw_image, img, predicted_depth, boxes, scores, cls_ids, conf=0.
         x1 = int(box[2])
         y1 = int(box[3])
 
-        mask = Mask(raw_image[int(y0):int(y1), int(x0):int(x1)])/255
-        dis1 = ( np.sum(predicted_depth[int(y0):int(y1), int(x0):int(x1)]*mask) )/np.sum(mask)
-        mask = -1*(mask-1)
-        dis2 = ( np.sum(predicted_depth[int(y0):int(y1), int(x0):int(x1)]*mask) )/np.sum(mask)
-        dis = min(dis1, dis2)
+        dis = Distance(raw_image, predicted_depth, box)
 
         if dis > depth_thr:
             continue
@@ -59,6 +55,21 @@ def Depth2Img (Depth):
     depthMap = depthMap[:, :, 0:3] * 255
     depthMap = depthMap.astype('uint8')
     return depthMap
+
+def Distance(raw_image, predicted_depth, box):
+    x0 = int(box[0])
+    y0 = int(box[1])
+    x1 = int(box[2])
+    y1 = int(box[3])
+
+    mask = Mask(raw_image[int(y0):int(y1), int(x0):int(x1)])/255
+    dis1 = ( np.sum(predicted_depth[int(y0):int(y1), int(x0):int(x1)]*mask) )/np.sum(mask)
+    mask = -1*(mask-1)
+    dis2 = ( np.sum(predicted_depth[int(y0):int(y1), int(x0):int(x1)]*mask) )/np.sum(mask)
+    dis = min(dis1, dis2)
+
+    return dis
+    
 
 def Mask(img):  
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
