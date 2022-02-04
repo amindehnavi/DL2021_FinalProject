@@ -18,7 +18,7 @@ class MainWindow(QWidget):
         self.YOLOModel, self.YOLOModel_exp = Models.LoadYOLOX()
 
         self.DepthThreshold = 10.0
-        self.MinConfidence = 0.5
+        self.MinConfidence = 50
         self.RawImage = 0
         self.Depth = 0
         self.BoundingBox = 0
@@ -28,8 +28,8 @@ class MainWindow(QWidget):
 
     def InitUi(self):
         self.setGeometry(0, 0, 1181, 719)
-        self.setWindowTitle("Sharif Vision")
-        self.setWindowIcon(QIcon('./Images/Icon.svg'))
+        self.setWindowTitle("Sharif Deep Vision")
+        self.setWindowIcon(QIcon('./Images/logo.png'))
         self.setWindowFlags(Qt.WindowCloseButtonHint |
                             Qt.WindowMinimizeButtonHint)
 
@@ -161,7 +161,7 @@ class MainWindow(QWidget):
         self.DepthThresholdSlider = QSlider(self)
         self.DepthThresholdSlider.setGeometry(680, 390, 491, 22)
         self.DepthThresholdSlider.setOrientation(Qt.Horizontal)
-        self.DepthThresholdSlider.setMaximum(1000)
+        self.DepthThresholdSlider.setMaximum(100)
         self.DepthThresholdSlider.setMinimum(0)
         self.DepthThresholdSlider.valueChanged.connect(
             self.DepthThresholdSliderRoutine)
@@ -248,20 +248,20 @@ class MainWindow(QWidget):
             self.RadioButton = button.text()
     
     def DepthThresholdSliderRoutine(self):
-        self.DepthThreshold = self.DepthThresholdSlider.value()/100
+        self.DepthThreshold = self.DepthThresholdSlider.value()/10
         self.DepthThresholdLabel.setText(
             f"Max. Depth : {self.DepthThreshold} m")
     
     def MinConfidenceSliderRoutine(self):
-        self.MinConfidence = self.MinConfidenceSlider.value()/100
+        self.MinConfidence = self.MinConfidenceSlider.value()
         self.MinConfidenceLabel.setText(
-            f"Min. Confidence : {self.MinConfidence}")
+            f"Min. Confidence : {self.MinConfidence}%")
 
     def ApplyRoutine(self):
         self.MessageBox.append('\n>>> Apply')
         self.Image = Visual.visualize(np.copy(self.RawImage), np.copy(self.Depth),
-                                      self.YOLO_Out, self.Img_Info, self.DepthThreshold,
-                                      self.MinConfidence, self.RadioButton)
+                                      self.YOLO_Out.copy(), self.Img_Info, self.DepthThreshold,
+                                      self.MinConfidence/100, self.RadioButton)
         self.ShowImage(self.Image)
         self.MessageBox.append('Ok')
 
@@ -280,14 +280,10 @@ class MainWindow(QWidget):
         self.RadioButton3.setEnabled(state)
         self.RadioButton4.setEnabled(state)
 
-        self.DepthThresholdLabel.setText(
-        f"Max. Depth : {self.DepthThreshold} m")
         self.DepthThresholdSlider.setValue(1000)
         self.DepthThresholdLabel.setEnabled(state)
         self.DepthThresholdSlider.setEnabled(state)
 
-        self.MinConfidenceLabel.setText(
-            f"Min. Confidence : {self.MinConfidence}")
         self.MinConfidenceSlider.setValue(50)
         self.MinConfidenceLabel.setEnabled(state)
         self.MinConfidenceSlider.setEnabled(state)
