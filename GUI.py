@@ -201,6 +201,7 @@ class MainWindow(QWidget):
         self.PredictButton.setEnabled(True)
         if(len(self.FilePathLineEdit.text()) > 1 and len(self.SavePathLineEdit.text()) > 1):
             self.SaveButton.setEnabled(True)
+        self.EnableOption(False)
         self.MessageBox.append('Image Loaded')
 
     def SavePathRoutine(self):
