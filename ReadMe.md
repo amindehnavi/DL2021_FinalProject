@@ -1,6 +1,9 @@
 <div align="center"><img src="Images/logo.png" width="240"></div>
 <img src="Images/demo.png" >
 
+## Report
+You can download the Report from [here](https://github.com/amindehnavi/DL2021_FinalProject/blob/master/Report.pdf)
+
 ## Introduction
 In this project, we intend to detect objects that are closer than a threshold using depth estimation and object detection networks.
 
