@@ -1,4 +1,4 @@
-<div align="center"><img src="Images/logo2.png" width="240"></div>
+<div align="center"><img src="Images/logo.png" width="240"></div>
 
 ## Introduction
 In this project, we intend to detect objects that are closer than a threshold using depth estimation and object detection networks.
@@ -6,7 +6,7 @@ In this project, we intend to detect objects that are closer than a threshold us
 We used the [AdaBins](https://github.com/Megvii-BaseDetection/YOLOX) for depth estimation and [YOLOX](https://github.com/shariqfarooq123/AdaBins) for object detection.
 
 ## Download Links
-* You can download the pretrained models "AdaBins_nyu.pt" and "yolox_m.pt" from [here](https://drive.google.com/drive/folders/1nYyaQXOBjNdUJDsmJpcRpu6oE55aQoLA?usp=sharing)
+* You can download the pretrained models "AdaBins_nyu.pt" and "yolox_m.pt" from [here](https://drive.google.com/drive/folders/1wUDM4fUDUV4LDhmVqts5p8-AIgnVlZsm?usp=sharing)
 
 ## Quick Start
 
