@@ -5,19 +5,21 @@ import numpy as np
 # For Single Image
 
 
-def JointNets(det_pred, det_gt, iou_thr, dep_pred, dep_gt, dep_thr):
+def JointNets(det_pred, det_gt, iou_thr, dep_pred, dep_gt, dep_thr, AP_det):
 
     depth_recall, depth_precision = TruePR(dep_pred, dep_gt, dep_thr)
-    det_recall, det_precision = ObjectDetectionMetrics(
-        det_pred, det_gt, iou_thr)
+    # det_recall, det_precision = ObjectDetectionMetrics(
+    #    det_pred, det_gt, iou_thr)
 
-    recalls = depth_recall * det_recall
-    precisions = depth_precision * det_precision
+    #recalls = depth_recall * det_recall
+    #precisions = depth_precision * det_precision
 
     # Calculate the F1-Score
-    F1 = 2 * (recalls * precisions) / (recalls + precisions)
+    #F1 = 2 * (recalls * precisions) / (recalls + precisions)
 
-    return F1
+    AP_joint = AP_det * depth_recall * depth_precision
+
+    return AP_joint
 
 # Depth Estimation Metrics  #####################################################
 
