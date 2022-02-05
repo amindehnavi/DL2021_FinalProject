@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QSlider
 from PyQt5.QtWidgets import QPushButton, QLineEdit, QTextBrowser
-from PyQt5.QtWidgets import QFileDialog, QFrame, QCheckBox,QRadioButton
+from PyQt5.QtWidgets import QFileDialog, QFrame, QCheckBox, QRadioButton
 from PyQt5.QtGui import QIcon, QPixmap, QFont, QImage
 from PyQt5.QtCore import Qt
 import Models
@@ -20,6 +20,7 @@ class MainWindow(QWidget):
         self.DepthThreshold = 10.0
         self.MinConfidence = 50
         self.RawImage = 0
+        self.RawImageSize = (640, 480)
         self.Depth = 0
         self.BoundingBox = 0
         self.RadioButton = 'Raw Image'
@@ -165,7 +166,7 @@ class MainWindow(QWidget):
         self.DepthThresholdSlider.setMinimum(0)
         self.DepthThresholdSlider.valueChanged.connect(
             self.DepthThresholdSliderRoutine)
-        
+
         self.MinConfidenceLabel = QLabel(self)
         self.MinConfidenceLabel.setGeometry(680, 430, 471, 21)
         self.MinConfidenceLabel.setFont(MainFont)
@@ -194,6 +195,7 @@ class MainWindow(QWidget):
             return
         self.FilePathLineEdit.setText(FileName)
         self.RawImage = Image.open(FileName)
+        self.RawImageSize = self.RawImage.size
         self.RawImage = self.RawImage.resize((640, 480))
         self.RawImage = np.asarray(self.RawImage)
         self.Image = self.RawImage
@@ -219,6 +221,7 @@ class MainWindow(QWidget):
     def SaveRoutine(self):
         self.MessageBox.append('\n>>> Saving')
         img = Image.fromarray(self.Image)
+        img = img.resize(self.RawImageSize)
         img.save(self.SavePathLineEdit.text() +
                  f"/Image_{self.SaveCounter}.jpg")
         self.SaveCounter += 1
@@ -241,17 +244,17 @@ class MainWindow(QWidget):
         self.SaveButton.setEnabled(False)
         self.EnableOption(False)
         self.MessageBox.append('Ok')
-    
+
     def RadioButtonRoutine(self, _):
         button = self.sender()
         if button.isChecked() == True:
             self.RadioButton = button.text()
-    
+
     def DepthThresholdSliderRoutine(self):
         self.DepthThreshold = self.DepthThresholdSlider.value()/10
         self.DepthThresholdLabel.setText(
             f"Max. Depth : {self.DepthThreshold} m")
-    
+
     def MinConfidenceSliderRoutine(self):
         self.MinConfidence = self.MinConfidenceSlider.value()
         self.MinConfidenceLabel.setText(
