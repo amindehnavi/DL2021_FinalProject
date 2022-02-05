@@ -16,9 +16,11 @@ def Bbox_Drawer(raw_image, img, predicted_depth, boxes, scores, cls_ids, conf=0.
         y0 = int(box[1])
         x1 = int(box[2])
         y1 = int(box[3])
-
+        
+        #dis = np.mean(predicted_depth[int(y0):int(y1), int(x0):int(x1)])
         dis = Distance(raw_image, predicted_depth, box)
-
+        dis = round(dis,1)
+        
         if dis > depth_thr:
             continue
         color = (_COLORS[cls_id] * 255).astype(np.uint8).tolist()
@@ -73,7 +75,8 @@ def Distance(raw_image, predicted_depth, box):
 
 def Mask(img):  
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, mask = cv2.threshold(gray, 0, 255,
+    blur = cv2.GaussianBlur(gray,(5,5),0)
+    _, mask = cv2.threshold(blur, 0, 255,
     cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     return mask
 
@@ -109,12 +112,12 @@ def visualize(RawImage, Depth, YOLO_Out, Img_Info, DepthThreshold,  Conf=0.5, Ra
         # Draw corresponding bounding boxes on depth map
         if RadioButton == 'Raw Image + Bounding Boxes':
             res_img = Bbox_Drawer(
-                RawImage, RawImage, Depth, Bboxes, Scores, Cls, conf=Conf, depth_thr=DepthThreshold)
+                np.copy(RawImage), RawImage, Depth, Bboxes, Scores, Cls, conf=Conf, depth_thr=DepthThreshold)
             return res_img
 
         elif RadioButton == 'Depth Image + Bounding Boxes':
             res_img = Bbox_Drawer(
-                RawImage, Depth2Img(Depth), Depth, Bboxes, Scores, Cls, conf=Conf, depth_thr=DepthThreshold)
+                RawImage, Depth2Img(np.copy(Depth)), Depth, Bboxes, Scores, Cls, conf=Conf, depth_thr=DepthThreshold)
             return res_img
     
     return RawImage
