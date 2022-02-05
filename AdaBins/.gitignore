@@ -6,5 +6,5 @@ predictions_nyu/
 predictions_kitti/
 wandb/
 checkpoints/
-pretrained/
 
+./pretrained/AdaBins_nyu.pt
