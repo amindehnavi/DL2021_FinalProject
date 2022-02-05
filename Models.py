@@ -20,7 +20,7 @@ def PredictDepth(Model, Image):
     return predicted_depth[0, 0, :, :]
 
 
-def LoadYOLOX(ckpt_path='./YOLOX/Pretraiend/yolox_m.pth'):
+def LoadYOLOX(ckpt_path='./YOLOX/Pretrained/yolox_m.pth'):
     exp = get_exp(None, 'yolox-m')
     model = exp.get_model()
     logger.info("Model Summary: {}".format(
