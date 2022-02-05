@@ -2,7 +2,7 @@
 <img src="Images/demo.png" >
 
 ## Report
-You can download the Report from [here](https://github.com/amindehnavi/DL2021_FinalProject/blob/master/Report.pdf)
+You can download the Report from [here](https://github.com/amindehnavi/DL2021_FinalProject/blob/master/Report.pdf) / [drive](https://drive.google.com/file/d/1O1VbIYnK5w1KPLNowkbiH65bppfd5OlV/view?usp=sharing)
 
 ## Introduction
 In this project, we intend to detect objects that are closer than a threshold using depth estimation and object detection networks.
